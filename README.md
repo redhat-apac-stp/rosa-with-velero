@@ -1,8 +1,8 @@
 # ROSA with Velero
 
-This article describes how to integrate ROSA with Velero for backing up user-managed projects. This is separate from the Velero instance that is used by RedHat SRE for backing up managed components. This integration will leverage short-term credentials using IAM Roles for Service Accounts and the default OIDC provider. Doing so avoids needing to create a dedicated Velero user in IAM and storing long-term credentials in a Kubernetes secret.
+This article describes how to integrate ROSA with Velero for backing up and restoring all metadata stored in etcd for user-managed projects. This is a separate instance of Velero from that used by RedHat SRE. This integration will leverage short-term credentials and federated identify using the ROSA OIDC provider. Doing so avoids needing to create a dedicated user in IAM and exposing long-term credentials to Velero.
 
-Important disclaimer: due to a known limitation with Restic (https://github.com/vmware-tanzu/velero/issues/2958) it is currently not possible to restore dynamically created persistent volumes backed by EFS.
+Important disclaimer: due to a known limitation with Restic (https://github.com/vmware-tanzu/velero/issues/2958) it is currently not possible to restore dynamically provisioned persistent volumes based on EFS. Only the metadata describing persistent volumes and persistent volume claims can be backed up and restored using Velero. To backup (and restore) the data contained within an EFS file system please use AWS Backup which integrates natively with EFS.
 
 ROSA can be deployed as either a public or private cluster in STS mode as per these instructions:
 
