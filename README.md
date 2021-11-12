@@ -128,13 +128,13 @@ The following scenario simulate the loss and restoration of the application and 
 
 Download and install the Velero CLI. Create a backup of an application namespace to be deleted and restored. Ideally this namespace should have a pod running with a persistent volume based on EFS.
 
-	velero backup create my-project-1 --include-namespaces my-project --wait
+	velero backup create my-backup-1 --include-namespaces my-project --wait
 
 Delete the namespace/project and the underlying persistent volumes (or the PVC will not be terminated and the namespace not deleted). If you do not delete the persistent volumes the restore operation will not work. However before deleting the PV verify that the reclaim policy is set to Retain so that the delete operation will not cascade through to the underlying storage system.
 
 Restore the configuration from the backup using Velero.
 
-	velero restore create --from-backup my-project-1 --wait
+	velero restore create --from-backup my-backup-1 --wait
 
 Note that this restores the pod, persistent volume and persistent volume claim and binds these to the original EFS access point.
 
