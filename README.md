@@ -122,6 +122,10 @@ Run the following commands to verify the setup.
 	oc get pods -o wide -n velero
 	oc logs <velero pod> | grep "Backup storage location valid, marking as available"
 
+***
+
+The following scenario simulate the loss of an application and persistent volume.
+
 Download and install the Velero CLI. Create a backup of an application namespace to be deleted and restored. Ideally this namespace should have a pod running with a persistent volume based on EFS.
 
 	velero backup create my-project-1 --include-namespaces my-project --wait
