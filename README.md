@@ -143,11 +143,11 @@ Note that this restores the pod, persistent volume and persistent volume claim a
 Velero can also be used to restore from a total cluster failure scenario. In brief, the steps are:
 
 1. Build a new ROSA cluster (either in a new VPC or existing VPC).
-2. Switch the EFS fileystem mountpoint target to the new VPC and update the security group.
+2. Switch the EFS fileystem mountpoint target to the ROSA VPC and create a new security group if a new VPC was created (see instructions in the next step).
 3. Install the AWS EFS CSI Driver for ROSA as per https://github.com/redhat-apac-stp/rosa-with-aws-efs/blob/main/README.md
 4. Install Velero as per the instructions above.
 5. Verify access to the backup (oc get backup -n velero).
-6. Verify the storageclass for EFS is loaded (oc describe sc/efs-sc) and that it is referencing the EFS fileystem ID.
+6. Verify the storageclass for EFS is loaded (oc describe sc/efs-sc) and that it is referencing the EFS fileystem.
 7. Run the Velero restore command as per above.
 8. Verify the pod, persistent volume and persistent volume claims are restored.
 
