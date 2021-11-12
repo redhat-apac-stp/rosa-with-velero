@@ -122,13 +122,11 @@ Run the following commands to verify the setup.
 	oc get pods -o wide -n velero
 	oc logs <velero pod> | grep "Backup storage location valid, marking as available"
 
-Download and install the Velero CLI. Create a backup of an application namespace to be deleted and restored. Ideally this namespace should have a pod running with a persistent volume based on EFS mounted.
+Download and install the Velero CLI. Create a backup of an application namespace to be deleted and restored. Ideally this namespace should have a pod running with a persistent volume based on EFS.
 
 	velero backup create my-project-1 --include-namespaces my-project --wait
 
-Review the Velero backup logs
-
-Delete the namespace/project and then the underlying persistent volumes (or the PVC will not be terminated and the namespace not deleted). If you do not delete the persistent volumes the restore operation will not work. However before deleting the PV verify that the reclaim policy is set to Retain so that the delete operation will not cascade through to the underlying storage system.
+Delete the namespace/project and the underlying persistent volumes (or the PVC will not be terminated and the namespace not deleted). If you do not delete the persistent volumes the restore operation will not work. However before deleting the PV verify that the reclaim policy is set to Retain so that the delete operation will not cascade through to the underlying storage system.
 
 Restore the configuration from the backup using Velero.
 
@@ -136,16 +134,18 @@ Restore the configuration from the backup using Velero.
 
 Note that this restores the pod, persistent volume and persistent volume claim and binds these to the original EFS access point.
 
-Velero can also restore from a cluster failure. In brief, the steps are:
+***
+
+Velero can also be used to restore from a total cluster failure scenario. In brief, the steps are:
 
 1. Build a new ROSA cluster (either in a new VPC or existing VPC).
 2. Switch the EFS fileystem mountpoint target to the new VPC and update the security group.
 3. Install the AWS EFS CSI Driver for ROSA as per https://github.com/redhat-apac-stp/rosa-with-aws-efs/blob/main/README.md
-4. Install Velero as per the instructions above and switch the OIDC provider to that of the new cluster.
-5. Verify access to the backup on S3 (oc get backup -n velero)
-6. Verify the storageclass for EFS is loaded (oc describe sc/efs-sc) and is connected to the existing fileystem ID
-7. Run the Velero restore command
-8. Verify the persistent volume (oc get pv) and persistent volume claim is restored (oc get pvc)
+4. Install Velero as per the instructions above.
+5. Verify access to the backup (oc get backup -n velero).
+6. Verify the storageclass for EFS is loaded (oc describe sc/efs-sc) and that it is referencing the EFS fileystem ID.
+7. Run the Velero restore command as per above.
+8. Verify the pod, persistent volume and persistent volume claims are restored.
 
 ***
 
