@@ -124,7 +124,7 @@ Run the following commands to verify the setup.
 
 ***
 
-The following scenario simulate the loss of an application and persistent volume.
+The following scenario simulate the loss and restoration of the application and persistent volume.
 
 Download and install the Velero CLI. Create a backup of an application namespace to be deleted and restored. Ideally this namespace should have a pod running with a persistent volume based on EFS.
 
