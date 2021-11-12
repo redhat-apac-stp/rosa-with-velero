@@ -122,54 +122,30 @@ Run the following commands to verify the setup.
 	oc get pods -o wide -n velero
 	oc logs <velero pod> | grep "Backup storage location valid, marking as available"
 
-Download and install the Velero CLI.
+Download and install the Velero CLI. Create a backup of an application namespace to be deleted and restored. Ideally this namespace should have a pod running with a persistent volume based on EFS mounted.
 
-velero backup create my-project-1 --include-namespaces my-project --wait
+	velero backup create my-project-1 --include-namespaces my-project --wait
 
 Review the Velero backup logs
 
-Delete the namespace/project including persistent volumes (or the PVC will not be terminated). If you do not delete the persistent volumes the restore operation will not work. However before deleting the PV verify that the reclaim policy is set to Retain so that the delete will not cascade to the underlying storage system.
+Delete the namespace/project and then the underlying persistent volumes (or the PVC will not be terminated and the namespace not deleted). If you do not delete the persistent volumes the restore operation will not work. However before deleting the PV verify that the reclaim policy is set to Retain so that the delete operation will not cascade through to the underlying storage system.
 
-velero restore create --from-backup my-project-1 --wait
+Restore the configuration from the backup using Velero.
 
-Verify that the pod, PVC and PV has been restored and the data is as expected.
+	velero restore create --from-backup my-project-1 --wait
 
+Note that this restores the pod, persistent volume and persistent volume claim and binds these to the original EFS access point.
 
+Velero can also restore from a cluster failure. In brief, the steps are:
 
-
-
-Test a backup and restore of a persistent volume (e.g., deploy a PostgreSQL databases backed by EBS volumes). Backup the namespace with the following YAML.
-
-	apiVersion: velero.io/v1
-	kind: Backup
-	metadata:
-	  name: postgresql-backup-1
-	  namespace: velero
-	spec:
-	  includedNamespaces:
-	  - my-postgresql
-
-Check the status of the backup using the following command and confirm Restic was in fact used to backup any persistent volumes.
-
-	oc describe backup postgresql-backup-1
-
-Delete the namespace and resources therein and then restore everything via the following YAML.
-
-	apiVersion: velero.io/v1
-	kind: Restore
-	metadata:
-	  name: postgresql-restore-1
-	  namespace: velero
-	spec:
-	  backupName: postgresql-backup-1
-	  includedNamespaces:
-	  - my-postgresql
-
-Check the status of the restore using the following command to confirm all items were restored.
-
-	oc describe restore postgresql-restore-1
-
-Confirm the contents of the database were restored in the namespace specified.
+1. Build a new ROSA cluster (either in a new VPC or existing VPC).
+2. Switch the EFS fileystem mountpoint target to the new VPC and update the security group.
+3. Install the AWS EFS CSI Driver for ROSA as per https://github.com/redhat-apac-stp/rosa-with-aws-efs/blob/main/README.md
+4. Install Velero as per the instructions above and switch the OIDC provider to that of the new cluster.
+5. Verify access to the backup on S3 (oc get backup -n velero)
+6. Verify the storageclass for EFS is loaded (oc describe sc/efs-sc) and is connected to the existing fileystem ID
+7. Run the Velero restore command
+8. Verify the persistent volume (oc get pv) and persistent volume claim is restored (oc get pvc)
 
 ***
 
