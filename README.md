@@ -122,7 +122,7 @@ Run the following commands to verify the setup.
 	oc get pods -o wide -n velero
 	oc logs <velero pod> | grep "Backup storage location valid, marking as available"
 
-Use the Velero CLI 
+Download and install the Velero CLI.
 
 velero backup create my-project-1 --include-namespaces my-project --wait
 
